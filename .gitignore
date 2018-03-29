@@ -1,0 +1,13 @@
+# Folders
+.DS_Store
+node_modules
+platforms
+# Files
+*.log
+*.tmp
+*.tmp.*
+www/*.js
+www/*.jpg
+www/[0-9]*.png
+package-lock.json
+
