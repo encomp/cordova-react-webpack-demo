@@ -2,6 +2,7 @@ const path = require('path');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 
 const ENV = require('./env');
 const PATHS = {
@@ -13,12 +14,8 @@ process.env.BABEL_ENV = ENV;
 
 const common = {
   entry: PATHS.src,
-  output: {
-    path: PATHS.build,
-    filename: 'bundle.js',
-  },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.css$/,
         use: [
@@ -51,10 +48,22 @@ const common = {
       }
     ]
   },
+  output: {
+    filename: '[name].bundle.js',
+    chunkFilename: '[name].bundle.js',
+    path: PATHS.build,
+  },
   resolve: {
     extensions: ['.js', '.jsx'],
     modules: ['src', 'node_modules']  
   },
+  plugins: [
+    new HtmlWebPackPlugin({
+      title: 'Open Air Market',
+      template: 'public/index.html',
+      favicon: 'public/icon.png'
+    }),
+  ],
 };
 
 if (ENV === 'development') {
@@ -78,9 +87,6 @@ if (ENV === 'development') {
       port: process.env.PORT,
     },
     plugins: [
-      new HtmlWebPackPlugin({
-        template: "./www/index.html",
-      }),
       new webpack.HotModuleReplacementPlugin(),
     ],
   });
@@ -88,12 +94,15 @@ if (ENV === 'development') {
 else {
   // config can be added here for minifying / etc
   module.exports = merge(common, {
-  plugins: [
+    plugins: [
+      new MinifyPlugin({}, {
+        include: /bundle.js/,
+      }),
       new webpack.DefinePlugin({
         'process.env': {
           'NODE_ENV': JSON.stringify('production')
         }
       })
     ],
-    });
+  });
 }
